@@ -2,11 +2,15 @@
 
 STAKE=100
 BET=1
+TOTAL_DAYS=20
 
+numDays=0
+totalAmount=0
 
-while true
+while [ $numDays -le $TOTAL_DAYS ]
 do
 	cash=$STAKE
+	((numDays++))
 
 	while true
 	do
@@ -25,4 +29,8 @@ do
 			cash=$(($cash-$BET))
 		fi
 	done
+
+	totalAmount=$(($totalAmount+$cash))
 done
+
+echo $totalAmount
