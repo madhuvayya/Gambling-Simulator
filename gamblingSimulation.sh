@@ -67,5 +67,28 @@ daysWonLost(){
 	fi
 }
 
+luckiestUnluckiestDay(){
+
+	max=${dayWonLost[0]}
+	min=${dayWonLost[0]}
+
+	for((l=1;l<${#dayWonLost[@]};l++))
+	do
+		if [ $max -lt ${dayWonLost[$l]} ]
+		then
+			max=${dayWonLost[$l]}
+		fi
+
+		if [ $min -gt ${dayWonLost[$l]} ]
+		then
+			min=${dayWonLost[$l]}
+		fi
+	done
+
+	echo "Luckiest day: $max"
+	echo "Unluckiest day: $min"
+}
 
 daysWonLost
+
+luckiestUnluckiestDay
