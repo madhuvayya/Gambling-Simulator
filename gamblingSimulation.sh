@@ -1,18 +1,23 @@
 #!/bin/bash
 
+#constants
 STAKE=100
 BET=1
 TOTAL_DAYS=20
-WON=150
-LOST=50
+WON=$(( $STAKE + $STAKE / 2 ))
+LOST=$(( $STAKE / 2))
 
-numDays=0
+#Variables
+numOfDays=0
+numOfMonths=0
 monthEarnedAmount=0
-wonDays=0
-lostDays=0
-diffAmount=0
 
-daysWonLost(){
+findDaysWonLost(){
+
+	wonDays=0
+	lostDays=0
+	diffAmount=0
+
 	for((k=0;k<${#dayWonLost[@]};k++))
 	do
 		if [ ${dayWonLost[k]} -eq $WON ]
@@ -21,24 +26,23 @@ daysWonLost(){
 		else
 			((lostDays++))
 		fi
-
-		totalAmountMonth=$(($totalAmount+$cash))
 	done
 
-	echo "Number of days won: $wonDays"
-	echo "Number of days lost: $lostDays"
+	echo "Number of days won:" $wonDays
+	echo "Number of days lost:" $lostDays
 
-	diffAmount=$(($totalAmountMonth-$(($STAKE*$TOTAL_DAYS))))
+	echo "Amount earned in month:" $monthEarnedAmount
+	diffAmount=$(( $monthEarnedAmount - $(($STAKE*$TOTAL_DAYS)) ))
 
-	if [ $diffAmount -gt $(($STAKE*$TOTAL_DAYS)) ]
+	if [ $monthEarnedAmount -gt $(($STAKE*$TOTAL_DAYS)) ]
 	then
-		echo "Won the month with amount: $diffAmount"
+		echo "Won the month with amount:" $diffAmount
 	else
-		echo "Lost the month with amount: $diffAmount"
+		echo "Lost the month with amount:" $diffAmount
 	fi
 }
 
-luckiestUnluckiestDay(){
+findLuckiestUnluckiestDay(){
 
 	max=${dayWonLost[0]}
 	min=${dayWonLost[0]}
@@ -60,45 +64,56 @@ luckiestUnluckiestDay(){
 	echo "Unluckiest day: $min"
 }
 
+dayPlay(){
+	while true
+	do
+		if [ $cash -eq $LOST -o $cash -eq $WON ]
+		then
+			break
+		fi
+
+		res=$((RANDOM%2))
+
+		if [ $res -eq 1 ]
+		then
+			cash=$(( $cash + $BET ))
+		else
+			cash=$(( $cash - $BET ))
+		fi
+	done
+}
+
 while true
 do
+	numOfDays=0
+	monthEarnedAmount=0
 	i=0
-	while [ $numDays -lt $TOTAL_DAYS ]
+	while [ $numOfDays -lt $TOTAL_DAYS ]
 	do
 		cash=$STAKE
-		((numDays++))
+		((numOfDays++))
 
-		while true
-		do
-			if [ $cash -eq $(($STAKE/2)) -o $cash -eq $(($STAKE+$STAKE/2)) ]
-			then
-				#echo $cash
-				break
-			fi
-
-			res=$((RANDOM%2))
-
-			if [ $res -eq 1 ]
-			then
-				cash=$(($cash+$BET))
-			else
-				cash=$(($cash-$BET))
-			fi
-		done
+		#Invoking function dayPlay to play for the day
+		dayPlay
 
 		dayWonLost[((i++))]=$cash
-		monthEarnedAmount=$(($monthEarnedAmount+$cash))
+		monthEarnedAmount=$(( $monthEarnedAmount + $cash ))
 	done
 
-	echo "Amount earned in month: $monthEarnedAmount"
+	monthEarned[((j++))]=$monthEarnedAmount
 
-	daysWonLost
+	#Invoking function findDaysWonLost
+	findDaysWonLost
 
-	luckiestUnluckiestDay
+	#Invoking function findLuckiestUnluckiestDay
+	findLuckiestUnluckiestDay
 
-	if [ $diffAmount -lt $(($STAKE*$TOTAL_DAYS)) ]
+	echo "Amount earned in days:" ${dayWonLost[@]}
+
+	if [ $monthEarnedAmount -lt $(($STAKE*$TOTAL_DAYS)) ]
 	then
-		echo "Lost this month so not going to play next month"
+		echo "This month lost money, so not going to play next month"
+		echo "Amount earned in months:" ${monthEarned[@]}
 		exit
 	fi
 done
